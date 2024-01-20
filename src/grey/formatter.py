@@ -1,4 +1,6 @@
 import ast
+from sys import argv, stdin
+
 
 class TopLevelAndMethodInserter(ast.NodeVisitor):
     def __init__(self):
@@ -48,14 +50,17 @@ def format_code(source_code):
 
     return '\n'.join(lines)
 
-# Example usage
-source_code = """
-class MyClass:
-    def method1(self):
-        pass
-    def method2(self):
-        pass
-"""
 
-formatted_code = format_code(source_code)
-print(formatted_code)
+def main():
+    # Read source code from a file or standard input
+    if len(argv) > 1:
+        with open(argv[1], 'r') as file:
+            source_code = file.read()
+    else:
+        source_code = stdin.read()
+
+    formatted_code = format_code(source_code)
+    print(formatted_code)
+
+if __name__ == "__main__":
+    main()
