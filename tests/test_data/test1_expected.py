@@ -1,6 +1,6 @@
 
-def method():
+def test():
     pass
 
-def method1():
+def test1():
     pass

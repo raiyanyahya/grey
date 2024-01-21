@@ -7,6 +7,7 @@ class TopLevelAndMethodInserter(ast.NodeVisitor):
         # Store line numbers where blank lines should be inserted
         self.line_numbers_to_insert = []
 
+    # pylint: disable=invalid-name
     def visit_FunctionDef(self, node):
         if isinstance(node.parent, ast.Module):  # Top-level function
             self.line_numbers_to_insert.append(node.lineno - 1)  # Line before function
@@ -54,7 +55,7 @@ def format_code(source_code):
 def main():
     # Read source code from a file or standard input
     if len(argv) > 1:
-        with open(argv[1], 'r') as file:
+        with open(argv[1], 'r', encoding="UTF-8") as file:
             source_code = file.read()
     else:
         source_code = stdin.read()
