@@ -1,4 +1,6 @@
 import ast
+import tokenize
+from io import StringIO, BytesIO
 from sys import argv, stdin
 
 
@@ -25,6 +27,38 @@ class TopLevelAndMethodInserter(ast.NodeVisitor):
                 self.line_numbers_to_insert.append(node.body[0].lineno - 1)
         self.generic_visit(node)
 
+def add_spaces_around_operators(code):
+    new_code = StringIO()
+    tokens = list(tokenize.tokenize(BytesIO(code.encode('utf-8')).readline))
+
+    for i, token in enumerate(tokens):
+        # Skip the encoding token
+        if token.type == tokenize.ENCODING:
+            continue
+
+        # Handle spaces for function definitions
+        if token.type == tokenize.NAME and token.string == 'def' and i < len(tokens) - 1:
+            next_token = tokens[i + 1]
+            if next_token.type == tokenize.NAME:
+                new_code.write(token.string + ' ')
+                continue
+
+        # Add space before operator, if appropriate
+        if token.type == tokenize.OP and token.string in ['=', '=='] and i > 0:
+            prev_token = tokens[i - 1]
+            if prev_token.type not in [tokenize.NEWLINE, tokenize.NL]:
+                new_code.write(' ')
+
+        new_code.write(token.string)
+
+        # Add space after operator, if appropriate
+        if token.type == tokenize.OP and token.string in ['=', '=='] and i < len(tokens) - 1:
+            next_token = tokens[i + 1]
+            if next_token.type not in [tokenize.NEWLINE, tokenize.NL]:
+                new_code.write(' ')
+
+    return new_code.getvalue()
+
 def format_code(source_code):
     tree = ast.parse(source_code)
 
@@ -49,7 +83,17 @@ def format_code(source_code):
             lines.insert(index, '')
             offset += 1
 
-    return '\n'.join(lines)
+    # Join lines and ensure consistent Unix-style line endings
+    formatted_code = '\n'.join(lines)
+
+    # Add a final newline character to the formatted code if it's not empty
+    if formatted_code and not formatted_code.endswith('\n'):
+        formatted_code += '\n'
+
+    return formatted_code
+
+    #return add_spaces_around_operators(formatted_code)
+
 
 
 def main():

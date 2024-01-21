@@ -2,8 +2,9 @@ import unittest
 import os
 import sys
 from glob import glob
+from functools import partial
 
-# Adjust the path for importing the my_formatter module
+# Adjust the path for importing the formatter module
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(current_dir, '..', 'src')
 sys.path.append(src_dir)
@@ -28,8 +29,8 @@ def generate_test_cases():
     for source_file in source_files:
         expected_file = source_file.replace('_source.py', '_expected.py')
 
-        # Create a test method for each pair of files
-        def test_method(self):
+        # Define a closure that captures the current source_file and expected_file
+        def test_method(self, source_file=source_file, expected_file=expected_file):
             self.run_test_case(source_file, expected_file)
 
         # Set a dynamic method name
